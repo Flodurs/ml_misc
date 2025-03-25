@@ -16,13 +16,13 @@ plt.show()
 
 
 # Initialise the environment
-env = gym.make("CartPole-v1", render_mode="human")
+env = gym.make("LunarLander-v2", render_mode="human")
 
 # stuff
 latest_trajectory = []
 trajectorys = []
 trajectory_sample_num = 5
-agent = REINFORCE.REINFORCE(4,2, 0.01, 0.01, baseline_mode=2)
+agent = REINFORCE.REINFORCE(8,4, 0.0001, 0.0001, baseline_mode=2)
 # Reset the environment to generate the first observation
 old_observation, info = env.reset()
 for i in range(10000000):

@@ -55,7 +55,7 @@ class REINFORCE:
     
     def sample_from_dist(self, dist):
         action_probability_dist = [p/sum(dist) for p in dist]
-        action = np.random.choice([0, 1], 1, p=action_probability_dist)
+        action = np.random.choice([0, 1, 2, 3], 1, p=action_probability_dist)
         return action[0]
     
     def train_on_trajectorys(self, trajectorys):
