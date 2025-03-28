@@ -6,11 +6,11 @@ class model(torch.nn.Module):
         super(model, self).__init__()
 
         self.linear_relu_stack = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 30),
+            torch.nn.Linear(input_dim, 50),
             torch.nn.ReLU(),
-            torch.nn.Linear(30, 30),
+            torch.nn.Linear(50, 50),
             torch.nn.ReLU(),
-            torch.nn.Linear(30, output_dim),
+            torch.nn.Linear(50, output_dim),
             torch.nn.Softmax(dim=0)
         )
 
@@ -23,11 +23,11 @@ class value_model(torch.nn.Module):
         super(value_model, self).__init__()
 
         self.linear_relu_stack = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 30),
+            torch.nn.Linear(input_dim, 50),
             torch.nn.ReLU(),
-            torch.nn.Linear(30, 30),
+            torch.nn.Linear(50, 50),
             torch.nn.ReLU(),
-            torch.nn.Linear(30, output_dim)
+            torch.nn.Linear(50, output_dim)
         )
 
     def forward(self, x):
@@ -55,7 +55,7 @@ class REINFORCE:
     
     def sample_from_dist(self, dist):
         action_probability_dist = [p/sum(dist) for p in dist]
-        action = np.random.choice([0, 1, 2, 3], 1, p=action_probability_dist)
+        action = np.random.choice([0, 1,2,3], 1, p=action_probability_dist)
         return action[0]
     
     def train_on_trajectorys(self, trajectorys):

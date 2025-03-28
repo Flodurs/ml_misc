@@ -22,7 +22,7 @@ env = gym.make("CartPole-v1", render_mode="human")
 latest_trajectory = []
 trajectorys = []
 trajectory_sample_num = 5
-agent = REINFORCE.REINFORCE(4,2, 0.001, 0.01, baseline_mode=2)
+agent = REINFORCE.REINFORCE(4,2, 0.005, 0.001, baseline_mode=2)
 # Reset the environment to generate the first observation
 old_observation, info = env.reset()
 for i in range(10000000):
