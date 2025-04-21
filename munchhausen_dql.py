@@ -66,7 +66,6 @@ class munchhausen_dql:
     def train_step(self):
         self.step+=1
         sm = torch.nn.Softmax(dim=0)
-        log_sm = torch.nn.LogSoftmax(dim=0)
         for i in range(30):
             transition = self.replay_buffer.sample_transition()
             if transition.terminal:
@@ -78,7 +77,11 @@ class munchhausen_dql:
                 dist = sm(q_vals/self.tau)
                 print("dist:")
                 print(dist)
-                log_dist = torch.clip(self.tau*log_sm(q_vals/self.tau),min=-1,max=0)
+                #log_dist = torch.clip(self.tau*log_sm(q_vals/self.tau),min=-1,max=0)
+                v = torch.max(q_vals)
+                logsum = torch.logsumexp((q_vals - v)/self.tau, dim=0)
+                log_dist = q_vals - v - self.tau*logsum
+                log_dist = torch.clip(log_dist, min=-1, max=0)
                 for j in range(self.output_dim):
                     factor += dist[j]*(q_vals[j] - log_dist[j]) 
                 y = transition.reward + self.alpha*log_dist[transition.action] + self.gamma*factor

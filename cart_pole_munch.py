@@ -11,7 +11,7 @@ plt.show()
 # Initialise the environment
 env = gym.make("CartPole-v1", render_mode="human")
 # stuff
-agent = mdql.munchhausen_dql(input_dim=4, output_dim=2, gamma=0.9999, epsilon=0.0001, buffer_size=10000, lr=0.001, copy_interval=100, tau=0.03, alpha=0.9)
+agent = mdql.munchhausen_dql(input_dim=4, output_dim=2, gamma=0.9999, epsilon=0.0001, buffer_size=10000, lr=0.001, copy_interval=400, tau=0.1, alpha=0.9)
 # Reset the environment to generate the first observation
 old_observation, info = env.reset()
 
