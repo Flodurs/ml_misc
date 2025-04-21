@@ -11,7 +11,7 @@ plt.show()
 # Initialise the environment
 env = gym.make("CartPole-v1", render_mode="human")
 # stuff
-agent = dql.dql(input_dim=4, output_dim=2, gamma=0.99999, epsilon=0.02, buffer_size=10000, lr=0.008, copy_interval=300)
+agent = dql.dql(input_dim=4, output_dim=2, gamma=0.9999, epsilon=0.02, buffer_size=10000, lr=0.001, copy_interval=100)
 # Reset the environment to generate the first observation
 old_observation, info = env.reset()
 

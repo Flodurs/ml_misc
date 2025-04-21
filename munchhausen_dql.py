@@ -11,7 +11,7 @@ class model(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Linear(100, 100),
             torch.nn.ReLU(),
-            torch.nn.Linear(100, output_dim),
+            torch.nn.Linear(100, output_dim)
         )
 
     def forward(self, x):
@@ -23,7 +23,7 @@ class transition:
         self.state_a = state_a
         self.state_b = state_b
         self.action = action
-        self.reward = reward
+        self.reward = float(reward)
         self.terminal = terminal
 
 class replay_buffer:
@@ -39,8 +39,8 @@ class replay_buffer:
     def sample_transition(self):
         return random.choice(self.transitions)
 
-class dql:
-    def __init__(self, input_dim, output_dim, gamma, epsilon, buffer_size, lr, copy_interval):
+class munchhausen_dql:
+    def __init__(self, input_dim, output_dim, gamma, epsilon, buffer_size, lr, copy_interval, tau, alpha):
         self.model_prim = model(input_dim, output_dim)
         self.target = model(input_dim, output_dim)
         self.target.load_state_dict(self.model_prim.state_dict())
@@ -50,54 +50,58 @@ class dql:
         self.epsilon = epsilon
         self.optimizer = torch.optim.Adam(self.model_prim.parameters(), lr=lr)
         self.loss_func = torch.nn.MSELoss()
+        self.loss_func = torch.nn.HuberLoss(reduction='mean', delta=1.0)
+
         self.step = 0
         self.copy_interval = copy_interval
+        self.tau = tau
+        self.alpha = alpha
 
     def ask(self, state):
+        sm = torch.nn.Softmax(dim=0)
         if torch.bernoulli(torch.tensor([self.epsilon])) == 0:
-            return torch.argmax(self.model_prim.forward(torch.tensor(state))).item()
+            return self.sample_from_dist(sm(self.model_prim(torch.tensor(state))/self.tau).detach().tolist())
         return np.random.choice([x for x in range(self.output_dim)])
         
     def train_step(self):
         self.step+=1
-        for i in range(20):
+        sm = torch.nn.Softmax(dim=0)
+        log_sm = torch.nn.LogSoftmax(dim=0)
+        for i in range(30):
             transition = self.replay_buffer.sample_transition()
             if transition.terminal:
                 y = transition.reward
                 y = torch.tensor(y)
             else:
-                y = transition.reward + self.gamma*max(self.target.forward(torch.tensor(transition.state_b)))
-            print(y)
-            loss = self.loss_func(y, self.model_prim.forward(torch.tensor(transition.state_a))[transition.action])
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-        if self.step%self.copy_interval == 0:
-            self.target.load_state_dict(self.model_prim.state_dict())
-
-    def train_step_ddqn(self):
-        if len(self.replay_buffer.transitions) < 2000:
-            return
-        self.step+=1
-        self.eposilon_decay_lin()
-        for i in range(64):
-            transition = self.replay_buffer.sample_transition()
-            if transition.terminal:
-                y = float(transition.reward)
-                y = torch.tensor(y)
-            else:
-                y = transition.reward + self.gamma*self.target.forward(torch.tensor(transition.state_b))[torch.argmax(self.model_prim.forward(torch.tensor(transition.state_b)))]
+                factor = 0
+                q_vals = self.target(torch.tensor(transition.state_b))
+                dist = sm(q_vals/self.tau)
+                print("dist:")
+                print(dist)
+                log_dist = torch.clip(self.tau*log_sm(q_vals/self.tau),min=-1,max=0)
+                for j in range(self.output_dim):
+                    factor += dist[j]*(q_vals[j] - log_dist[j]) 
+                y = transition.reward + self.alpha*log_dist[transition.action] + self.gamma*factor
+            #print(y)
             loss = self.loss_func(y, self.model_prim.forward(torch.tensor(transition.state_a))[transition.action])
             loss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
         if self.step%self.copy_interval == 0:
             self.target.load_state_dict(self.model_prim.state_dict())
+            print("---------------------------------------------------------Update")
     
     def eposilon_decay_lin(self):
         summand = (0.5) / (3*50000)
-        self.epsilon = max(self.epsilon - summand, 0.001)
+        self.epsilon = max(self.epsilon - summand, 0.0000001)
         if self.step%100 == 0:
             print(self.epsilon)
             #print(len(self.replay_buffer.transitions))
         #print(self.epsilon)
+    
+    def sample_from_dist(self, dist):
+        #print(dist)
+        action_probability_dist = [p/sum(dist) for p in dist]
+        print(action_probability_dist)
+        action = np.random.choice([x for x in range(self.output_dim)], 1, p=action_probability_dist)
+        return action[0]
