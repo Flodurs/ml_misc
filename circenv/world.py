@@ -29,8 +29,8 @@ class world:
             vec = np.array([self.mobs[0].pos_x-self.mobs[1].pos_x, self.mobs[0].pos_y-self.mobs[1].pos_y])
             dist = np.linalg.norm(vec)
             vec = self.normalize(vec)
-            self.mobs[0].pos_x -= vec[0]*0.15
-            self.mobs[0].pos_y -= vec[1]*0.15
+            self.mobs[0].pos_x -= vec[0]*1
+            self.mobs[0].pos_y -= vec[1]*1
             if isinstance(mob, circenv.dql_agent.dql_agent):
                 if dist < self.mobs[0].radius+self.mobs[1].radius:
                     mob.reward(-1.0, True)
@@ -43,7 +43,7 @@ class world:
                     self.rewards.append(0.0)
                     mob.reward(0.1, True)
                     self.reset()
-        if self.step_num%15 == 0:
+        if self.step_num%1 == 0:
             self.mobs[1].learner.train_step()
 
             

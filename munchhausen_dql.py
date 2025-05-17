@@ -65,6 +65,8 @@ class munchhausen_dql:
         
     def train_step(self):
         self.step+=1
+        self.eposilon_decay_lin()
+        #print(len(self.replay_buffer.transitions))
         sm = torch.nn.Softmax(dim=0)
         for i in range(30):
             transition = self.replay_buffer.sample_transition()
@@ -75,8 +77,6 @@ class munchhausen_dql:
                 factor = 0
                 q_vals = self.target(torch.tensor(transition.state_b))
                 dist = sm(q_vals/self.tau)
-                print("dist:")
-                print(dist)
                 #log_dist = torch.clip(self.tau*log_sm(q_vals/self.tau),min=-1,max=0)
                 v = torch.max(q_vals)
                 logsum = torch.logsumexp((q_vals - v)/self.tau, dim=0)
@@ -95,16 +95,15 @@ class munchhausen_dql:
             print("---------------------------------------------------------Update")
     
     def eposilon_decay_lin(self):
-        summand = (0.5) / (3*50000)
+        summand = (0.5) / (50000)
         self.epsilon = max(self.epsilon - summand, 0.0000001)
         if self.step%100 == 0:
             print(self.epsilon)
-            #print(len(self.replay_buffer.transitions))
         #print(self.epsilon)
     
     def sample_from_dist(self, dist):
-        #print(dist)
+        #print("ac dist")
         action_probability_dist = [p/sum(dist) for p in dist]
-        print(action_probability_dist)
+        #print(action_probability_dist)
         action = np.random.choice([x for x in range(self.output_dim)], 1, p=action_probability_dist)
         return action[0]

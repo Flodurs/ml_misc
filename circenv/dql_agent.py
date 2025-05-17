@@ -7,7 +7,7 @@ class dql_agent(circenv.mob.mob):
     def __init__(self, x, y, r):
         super().__init__(x, y, r)
         #self.learner = dql.dql(input_dim=10, output_dim=6, gamma = 0.9999999, epsilon=0.2, buffer_size=500000, lr=0.00001, copy_interval=2000)
-        self.learner = mdql.munchhausen_dql(input_dim=10, output_dim=6, gamma = 0.999999, epsilon=0.0000001, buffer_size=600000, lr=0.0001, copy_interval=300, tau=0.3, alpha=0.9)
+        self.learner = mdql.munchhausen_dql(input_dim=10, output_dim=6, gamma = 0.999, epsilon=0.5, buffer_size=40000, lr=0.0001, copy_interval=400, tau=0.45, alpha=0.9)
         self.observation_buffer = []
         self.last_action = None
         self.view_ray_angles = [-0.4, -0.1, 0, 0.1, 0.4]

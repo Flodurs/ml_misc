@@ -6,8 +6,8 @@ class mob:
         self.pos_y = y
         self.vel_x = 0.0
         self.vel_y = 0.0
-        self.acceleration = 0.01
-        self.reibung = 0.99
+        self.acceleration = 0.4
+        self.reibung = 0.95
         self.radius = r
         self.view_ray_angles = []
         self.view_ray_len = 600
@@ -48,9 +48,9 @@ class mob:
         if a == 3:
             acc = np.array([0.0,1.0])
         if a == 4:
-            self.rotation += 0.02
+            self.rotation += 0.05
         if a == 5:
-            self.rotation -= 0.02
+            self.rotation -= 0.05
         acc*=self.acceleration
         vel=np.matmul(np.array([[np.cos(self.rotation),np.sin(self.rotation)], [-np.sin(self.rotation), np.cos(self.rotation)]]), acc)
         #vel = self.normalize(vel)*self.acceleration
