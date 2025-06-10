@@ -6,7 +6,7 @@ class mob:
         self.pos_y = y
         self.vel_x = 0.0
         self.vel_y = 0.0
-        self.acceleration = 0.4
+        self.acceleration = 2.0
         self.reibung = 0.95
         self.radius = r
         self.view_ray_angles = []

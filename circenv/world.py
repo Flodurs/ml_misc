@@ -29,25 +29,26 @@ class world:
             vec = np.array([self.mobs[0].pos_x-self.mobs[1].pos_x, self.mobs[0].pos_y-self.mobs[1].pos_y])
             dist = np.linalg.norm(vec)
             vec = self.normalize(vec)
-            self.mobs[0].pos_x -= vec[0]*1
-            self.mobs[0].pos_y -= vec[1]*1
+            self.mobs[0].pos_x -= vec[0]*1.3
+            self.mobs[0].pos_y -= vec[1]*1.3
             if isinstance(mob, circenv.dql_agent.dql_agent):
                 if dist < self.mobs[0].radius+self.mobs[1].radius:
                     mob.reward(-1.0, True)
-                    self.rewards.append(0.0)
+                    self.rewards.append(-1.0)
                     self.reset()
                 else:
-                    mob.reward(1.0, False)
-                    self.rewards.append(0.1)
+                    mob.reward(0.01, False)
+                    self.rewards.append(0.01)
                 if self.episode_step > 10000:
                     self.rewards.append(0.0)
-                    mob.reward(0.1, True)
+                    mob.reward(0.0, True)
                     self.reset()
         if self.step_num%1 == 0:
             self.mobs[1].learner.train_step()
 
             
     def reset(self):
+        print("RESET")
         n = 1
         self.mobs[n].pos_x = 250
         self.mobs[n].pos_y = 250
@@ -56,8 +57,9 @@ class world:
         self.mobs[n].rotation = random.uniform(0, 2*np.pi)
         self.mobs[n].observation_buffer = []
         self.mobs[n].last_action = None
+        self.mobs[n].reset()
         #self.mobs[n].ray_cast_hits = []
-        self.mobs[0].pos_x = random.randrange(0, 500)
+        self.mobs[0].pos_x = random.randrange(400, 500)
         self.mobs[0].pos_y = random.randrange(0, 500)
         self.episode_step = 0
 

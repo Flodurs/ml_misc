@@ -7,11 +7,11 @@ class model(torch.nn.Module):
         super(model, self).__init__()
 
         self.linear_relu_stack = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 100),
+            torch.nn.Linear(input_dim, 200),
             torch.nn.ReLU(),
-            torch.nn.Linear(100, 100),
+            torch.nn.Linear(200, 200),
             torch.nn.ReLU(),
-            torch.nn.Linear(100, output_dim)
+            torch.nn.Linear(200, output_dim)
         )
 
     def forward(self, x):
@@ -68,7 +68,7 @@ class munchhausen_dql:
         self.eposilon_decay_lin()
         #print(len(self.replay_buffer.transitions))
         sm = torch.nn.Softmax(dim=0)
-        for i in range(30):
+        for i in range(32):
             transition = self.replay_buffer.sample_transition()
             if transition.terminal:
                 y = transition.reward
@@ -93,9 +93,10 @@ class munchhausen_dql:
         if self.step%self.copy_interval == 0:
             self.target.load_state_dict(self.model_prim.state_dict())
             print("---------------------------------------------------------Update")
+            print(f"Replay mem: {len(self.replay_buffer.transitions)}")
     
     def eposilon_decay_lin(self):
-        summand = (0.5) / (50000)
+        summand = (0.5) / (100000)
         self.epsilon = max(self.epsilon - summand, 0.0000001)
         if self.step%100 == 0:
             print(self.epsilon)
